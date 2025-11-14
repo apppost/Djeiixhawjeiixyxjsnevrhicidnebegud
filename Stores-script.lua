@@ -13,7 +13,7 @@ screenGui.Parent = playerGui
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 500, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -250, -0.5, 0) -- Bắt đầu từ ngoài màn hình phía trên
+mainFrame.Position = UDim2.new(0.5, -250, -0.5, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = screenGui
@@ -50,7 +50,7 @@ title.Name = "Title"
 title.Size = UDim2.new(1, -20, 1, 0)
 title.Position = UDim2.new(0, 20, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "STORE SCRIPT🛍️"
+title.Text = "⚡ COMMAND TERMINAL"
 title.TextColor3 = Color3.fromRGB(100, 200, 255)
 title.TextSize = 20
 title.Font = Enum.Font.GothamBold
@@ -62,7 +62,7 @@ closeBtn.Name = "CloseButton"
 closeBtn.Size = UDim2.new(0, 40, 0, 40)
 closeBtn.Position = UDim2.new(1, -45, 0, 5)
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-closeBtn.Text = "×"
+closeBtn.Text = "✕"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.TextSize = 18
 closeBtn.Font = Enum.Font.GothamBold
@@ -77,16 +77,17 @@ infoText.Name = "InfoText"
 infoText.Size = UDim2.new(1, -40, 0, 180)
 infoText.Position = UDim2.new(0, 20, 0, 60)
 infoText.BackgroundTransparency = 1
-infoText.Text = [[ AVAILABLE COMMANDS:
+infoText.Text = [[📌 AVAILABLE COMMANDS:
 
 *Rank - Open Leaderboard
 *Console - Open Console (F9)
 *Reset - Disable Reset Button
 *Unreset - Enable Reset Button
 *Self - Load Self Chat Script
+*H - Respawn Character
 *Term - Toggle Terminal
 
-💡 : Type commands in chat to execute!]]
+💡 Type commands in chat to execute!]]
 infoText.TextColor3 = Color3.fromRGB(200, 200, 200)
 infoText.TextSize = 16
 infoText.Font = Enum.Font.Gotham
@@ -99,7 +100,7 @@ statusLabel.Name = "StatusLabel"
 statusLabel.Size = UDim2.new(1, -40, 0, 40)
 statusLabel.Position = UDim2.new(0, 20, 1, -50)
 statusLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-statusLabel.Text = "Listening for commands..."
+statusLabel.Text = "⏺ Listening for commands..."
 statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
 statusLabel.TextSize = 14
 statusLabel.Font = Enum.Font.GothamBold
@@ -161,7 +162,7 @@ local function executeCommand(command)
         StarterGui:SetCore("ResetButtonCallback", true)
         
     elseif command == "self" then
-        statusLabel.Text = " Loading Self Chat Script..."
+        statusLabel.Text = "⏳ Loading Self Chat Script..."
         statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
         local success, err = pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/apppost/Djeiixhawjeiixyxjsnevrhicidnebegud/refs/heads/main/Self-chat_self-talk"))()
@@ -170,7 +171,23 @@ local function executeCommand(command)
             statusLabel.Text = "✓ Self Chat Script loaded!"
             statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
         else
-            statusLabel.Text = " Failed to load script!"
+            statusLabel.Text = "❌ Failed to load script!"
+            statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        end
+        
+    elseif command == "h" then
+        statusLabel.Text = "🔄 Respawning character..."
+        statusLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        local success, err = pcall(function()
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid.Health = 0
+            end
+        end)
+        if success then
+            statusLabel.Text = "✓ Character respawned!"
+            statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+        else
+            statusLabel.Text = "❌ Failed to respawn!"
             statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
         end
         
@@ -187,16 +204,15 @@ local function executeCommand(command)
         end
         
     else
-        statusLabel.Text = "× Unknown command: *" .. command
+        statusLabel.Text = "❌ Unknown command: *" .. command
         statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     end
     
     wait(2)
-    statusLabel.Text = " Listening for commands..."
+    statusLabel.Text = "⏺ Listening for commands..."
     statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
 end
 
--- Lắng nghe chat
 player.Chatted:Connect(function(message)
     if message:sub(1, 1) == "*" then
         local command = message:sub(2)
