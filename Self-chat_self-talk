@@ -1,0 +1,72 @@
+-- Roblox Luau: Chat Toggle Button - Self Tag
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local player = Players.LocalPlayer
+
+local isToggled = false
+
+local function createToggleButton()
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "ChatToggleGui"
+	screenGui.ResetOnSpawn = false
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	
+	local toggleButton = Instance.new("TextButton")
+	toggleButton.Name = "ToggleButton"
+	toggleButton.Size = UDim2.new(0, 25, 0, 25)
+	toggleButton.Position = UDim2.new(0, 10, 1, -60)
+	toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	toggleButton.BorderSizePixel = 2
+	toggleButton.BorderColor3 = Color3.fromRGB(40, 40, 40)
+	toggleButton.Text = "[•]"
+	toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	toggleButton.TextSize = 14
+	toggleButton.Font = Enum.Font.SourceSansBold
+	toggleButton.Parent = screenGui
+	
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 4)
+	corner.Parent = toggleButton
+	
+	toggleButton.MouseButton1Click:Connect(function()
+		isToggled = not isToggled
+		
+		if isToggled then
+			toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
+			toggleButton.BorderColor3 = Color3.fromRGB(0, 200, 150)
+		else
+			toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+			toggleButton.BorderColor3 = Color3.fromRGB(40, 40, 40)
+		end
+	end)
+	
+	screenGui.Parent = player:WaitForChild("PlayerGui")
+end
+
+createToggleButton()
+
+-- TextChatService hook
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+	local textChannel = TextChatService.TextChannels.RBXGeneral
+	
+	textChannel.OnIncomingMessage = function(message)
+		if message.TextSource and message.TextSource.UserId == player.UserId and isToggled then
+			local properties = Instance.new("TextChatMessageProperties")
+			properties.PrefixText = string.format("<font color='rgb(255,200,50)'>[@%s]</font> ", player.Name)
+			return properties
+		end
+	end
+else
+	-- Legacy Chat hook
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local sayMessageRequest = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest")
+	
+	local oldFireServer = sayMessageRequest.FireServer
+	sayMessageRequest.FireServer = function(self, message, channel)
+		if isToggled then
+			message = string.format("[@%s] %s", player.Name, message)
+		end
+		return oldFireServer(self, message, channel)
+	end
+end
